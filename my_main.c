@@ -100,7 +100,8 @@ void first_pass() {
       printf("Frames set to: %d \n", num_frames);
       if ( basenameSet == 0){
 	printf("No name set, will use 'pic' as the basename\n");
-	strcpy( name, 'pic');
+	char *pic = 'pic';
+	strcpy( name, pic);
       }
       break;
       
@@ -145,16 +146,49 @@ void first_pass() {
   ====================*/
 struct vary_node ** second_pass() {
   if ( num_frames != 1 ){
-    vary_node AllFrames[ num_frames ];
-    
-    for (i=0;i<lastop;i++) {
-  
-      switch (op[i].opcode) {
+    int start, end, startVal, endVal;
+    struct vary_node ** values = (struct vary_node **)malloc(num_frames * sizeof(struct vary_node));
 
+    int i;
+    for (i=0;i<lastop;i++) {
+      
+      switch (op[i].opcode) {
+	
       case VARY:
 	printf("VARY found\n");
+	int a;
+	
+	//op[lastop].op.vary.p = add_symbol($2,SYM_STRING,0);
+	start = op[i].op.vary.start_frame;
+	end = op[i].op.vary.end_frame;
+	startVal = op[i].op.vary.start_val;
+	endVal = op[i].op.vary.end_val;
+	
+	for (a = start; a<end; a++){
+	  if (values[a] == NULL ){
+	    struct vary_node * newNode = (struct vary_node *)malloc(sizeof(struct vary_node));
+	    strcpy(newNode->name, op[lastop].op.vary.p);
+	    newNode->value = (startVal-endVal)/(end-start)*(a-start);
+	    newNode->next = NULL;
+	    
+	    values[a] = newNode;
+	  } else {
+	    struct vary_node * oldNode = values[a];
+	    for (; oldNode!=NULL; oldNode=oldNode->next){}
+
+	    struct vary_node * newNode = (struct vary_node *)malloc(sizeof(struct vary_node));
+	    strcpy(newNode->name, op[lastop].op.vary.p);
+	    newNode->value = (startVal-endVal)/(end-start)*(a-start);
+	    newNode->next = NULL;
+	    
+	    oldNode->next = newNode;
+	  }
+	}
 	break;
       }
+      /*
+	
+      */
     }
     
   }
