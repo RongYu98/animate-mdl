@@ -98,15 +98,19 @@ void first_pass() {
       }
       num_frames = op[i].op.frames.num_frames;
       printf("Frames set to: %d \n", num_frames);
-      if ( basenameSet == 0){
+      framesSet = 1;
+      /*	
+	if ( basenameSet == 0){
 	printf("No name set, will use 'pic' as the basename\n");
 	char *pic = 'pic';
 	strcpy( name, pic);
       }
+      */
       break;
       
     case BASENAME:
-      strncpy( name, op[i].op.basename.p, strlen(op[i].op.basename.p));
+      strncpy( name, op[i].op.basename.p->name, strlen(op[i].op.basename.p->name));
+      //name[strlen(op[i].op.basename.p)] = NULL;
       printf("Base Name has been set to: %s \n", name );
       basenameSet = 1;
       break;
@@ -119,8 +123,13 @@ void first_pass() {
       break;
     
     }
-  }
   
+  }
+  if ( basenameSet == 0){
+    printf("No name set, will use 'pic' as the basename\n");
+    char *pic = 'pic';
+    strcpy( name, pic);
+  }
 }
 
 /*======== struct vary_node ** second_pass()) ==========
@@ -268,14 +277,14 @@ void my_main( int polygons ) {
   char frame_name[128];
 
   s = new_stack();
-  tmp = new_stack();
+  tmp = new_matrix( 4, 1 );
 
   num_frames = 1;
   step = 5;
  
   g.red = 0;
-  g.green = 255;
-  g.blue = 255;
+  g.green = 250;
+  g.blue = 250;
 
   first_pass();
   printf("Completed First Pass \n");
@@ -314,13 +323,13 @@ void my_main( int polygons ) {
 	break;
 
       case BOX:
-	printf("%d\n",op[i].op.box.d0[0]);
-	printf("%d\n",op[i].op.box.d0[1]);
-	printf("%d\n",op[i].op.box.d0[2]);
 	/*
-	  -1
-	  2147483645
-	  2147483637
+	printf("%f\n",op[i].op.box.d0[0]);
+	printf("%f\n",op[i].op.box.d0[1]);
+	printf("%f\n",op[i].op.box.d0[2]);
+	printf("%f\n",op[i].op.box.d1[0]);
+	printf("%f\n",op[i].op.box.d1[1]);
+	printf("%f\n",op[i].op.box.d1[2]);
 	*/
 	printf("BOXED\n");
 
@@ -330,7 +339,6 @@ void my_main( int polygons ) {
 		 op[i].op.box.d1[0],
 		 op[i].op.box.d1[1],
 		 op[i].op.box.d1[2]);
-	printf("BOXED-ed\n");
 	matrix_mult( s->data[ s->top ], tmp );
 	draw_polygons( tmp, t, g );
 	tmp->lastcol = 0;
@@ -412,6 +420,17 @@ void my_main( int polygons ) {
 	display( t );
 	break;
       }
+      char dir[] = "animate/";
+      char s[ strlen(name) + 5 + 4+strlen(dir) ];
+      strncpy(s, dir, strlen(dir) );
+      strncpy(s, name, strlen(name) );
+      char d[4];
+      sprintf (d, "%03d", diffFrames );
+      
+      strncpy( s, d, strlen(d) );
+      strncpy( s, ".png", 5);
+      
+      save_extension( t, s );
     }
   
     free_stack( s );
