@@ -125,7 +125,7 @@ void first_pass() {
     }
   
   }
-  if ( basenameSet == 0){
+  if ( basenameSet ==  0 && num_frames != 1){
     printf("No name set, will use 'pic' as the basename\n");
     char *pic = 'pic';
     strcpy( name, pic);
@@ -335,7 +335,7 @@ void my_main( int polygons ) {
 		    step);
 	//apply the current top origin
 	matrix_mult( s->data[ s->top ], tmp );
-	//print_matrix(tmp);
+	print_matrix(tmp);
 	draw_polygons( tmp, t, g );
 	display(t);
 	tmp->lastcol = 0;
@@ -464,8 +464,10 @@ void my_main( int polygons ) {
 	display( t );
 	break;
       }
-      sprintf (frame_name, "./animate/%s%03d.png", name, f );
-      save_extension( t, frame_name );
+      if (num_frames!=1){
+	sprintf (frame_name, "./animate/%s%03d.png", name, f );
+	save_extension( t, frame_name );
+      }
     }
   
     free_stack( s );
