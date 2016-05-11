@@ -173,35 +173,43 @@ struct vary_node ** second_pass() {
 	end = op[i].op.vary.end_frame;
 	startVal = op[i].op.vary.start_val;
 	endVal = op[i].op.vary.end_val;
-	
-	for (a = start; a<end; a++){
+
+	//printf("endVal is %d, start is %d end is %d, start is %d\n", endVal, startVal, start, end);        
+	//printf("GUIASHODDJHAO\n");
+	//printf("%f\n", 1/(end-start)*(a-start));
+	for (a = start; a<=end; a++){
 	  if (values[a] == NULL ){
 	    struct vary_node * newNode = (struct vary_node *)malloc(sizeof(struct vary_node));
-	    strcpy(newNode->name, op[lastop].op.vary.p);
-	    newNode->value = (startVal-endVal)/(end-start)*(a-start);
+	    //printf("hi\n"); 
+	    strcpy(newNode->name, op[i].op.vary.p->name); 
+	    newNode->value = (double)(1/ (double) (end-start) )*(double)(a-start);
 	    newNode->next = NULL;
-	    
+	    //printf("a-start: %f \n",(double)(a-start));
+	    //printf("end - start: %d \n", end-start);
+	    //printf("Multiply: %f \n", 1/(end-start));
+	    printf("%f\n", newNode->value);
+	    //printf("a is %f, end is %f, start is %f end is %f, start is %f\n", a, endVal, startVal, start, end);
+
 	    values[a] = newNode;
 	  } else {
 	    struct vary_node * oldNode = values[a];
-	    for (; oldNode!=NULL; oldNode=oldNode->next){}
-
-	    struct vary_node * newNode = (struct vary_node *)malloc(sizeof(struct vary_node));
-	    strcpy(newNode->name, op[lastop].op.vary.p);
-	    newNode->value = (startVal-endVal)/(end-start)*(a-start);
-	    newNode->next = NULL;
 	    
+	    for (; oldNode->next!=NULL; oldNode=oldNode->next){}
+	    
+	    struct vary_node * newNode = (struct vary_node *)malloc(sizeof(struct vary_node));
+	    strcpy(newNode->name, op[i].op.vary.p->name);
+	    //newNode->value = (startVal-endVal)/(end-start)*(a-start);
+	    newNode->value = (double)(1/ (double) (end-start) )*(double)(a-start);
+	    newNode->next = NULL;
 	    oldNode->next = newNode;
 	  }
 	}
 	break;
       }
-      /*
-	
-      */
     }
-    
+    return values;
   }
+  return NULL;
 }
 
 
@@ -272,9 +280,12 @@ void my_main( int polygons ) {
   screen t;
   color g;
 
+  SYMTAB * table;
+
   struct vary_node **knobs;
   struct vary_node *vn;
   char frame_name[128];
+  char knobName[128];
 
   s = new_stack();
   tmp = new_matrix( 4, 1 );
@@ -285,12 +296,27 @@ void my_main( int polygons ) {
   g.red = 0;
   g.green = 250;
   g.blue = 250;
+ 
 
   first_pass();
   printf("Completed First Pass \n");
   printf("Num_Frames: %d\n", num_frames);
-  for (diffFrames = 0; diffFrames<num_frames; diffFrames++){
-    printf("work\n");
+  knobs = second_pass();
+  printf("Completed second pass\n");
+
+  for (f = 0; f<num_frames; f++){
+    
+    //printf("Populating the table with values from the array\n");
+    vn = knobs[f];
+    for (vn = knobs[f]; vn!=NULL; vn=vn->next){
+      //printf("hi\n");
+      set_value( lookup_symbol( vn->name ), vn->value );
+      //printf("hi\n");
+    }
+
+    print_knobs();
+    s = new_stack();
+    tmp = new_matrix( 4, 1 );
     
     for (i=0;i<lastop;i++) {
       switch (op[i].opcode) {
@@ -298,14 +324,20 @@ void my_main( int polygons ) {
 	printf("Got here\n");
       case SPHERE:
 	printf("SPHERE \n");
-	add_sphere( tmp,op[i].op.sphere.d[0], //cx
+	tmp = new_matrix( 4, 4 );
+	ident(tmp);
+	//printf("%f, %f, %f, %f", op[i].op.sphere.d[0], op[i].op.sphere.d[1], op[i].op.sphere.d[2], op[i].op.sphere.r);
+	//exit(0);
+	add_sphere( tmp, op[i].op.sphere.d[0], //cx
 		    op[i].op.sphere.d[1],  //cy
 		    op[i].op.sphere.d[2],  //cz
 		    op[i].op.sphere.r,
 		    step);
 	//apply the current top origin
 	matrix_mult( s->data[ s->top ], tmp );
+	//print_matrix(tmp);
 	draw_polygons( tmp, t, g );
+	display(t);
 	tmp->lastcol = 0;
 	break;
 
@@ -323,14 +355,6 @@ void my_main( int polygons ) {
 	break;
 
       case BOX:
-	/*
-	printf("%f\n",op[i].op.box.d0[0]);
-	printf("%f\n",op[i].op.box.d0[1]);
-	printf("%f\n",op[i].op.box.d0[2]);
-	printf("%f\n",op[i].op.box.d1[0]);
-	printf("%f\n",op[i].op.box.d1[1]);
-	printf("%f\n",op[i].op.box.d1[2]);
-	*/
 	printf("BOXED\n");
 
 	add_box( tmp, op[i].op.box.d0[0],
@@ -360,10 +384,17 @@ void my_main( int polygons ) {
       case MOVE:
 	printf("MOVE\n");
 	//get the factors
-	xval = op[i].op.move.d[0];
-	yval =  op[i].op.move.d[1];
-	zval = op[i].op.move.d[2];
-      
+	if (op[i].op.move.p == NULL){
+	  xval = op[i].op.move.d[0];
+	  yval =  op[i].op.move.d[1];
+	  zval = op[i].op.move.d[2];
+	} else {
+	  knob_value = lookup_symbol(op[i].op.move.p->name)->s.value;
+	  xval = op[i].op.move.d[0] * knob_value;
+	  yval = op[i].op.move.d[1] * knob_value;
+	  zval = op[i].op.move.d[2] * knob_value;
+	}
+	  
 	transform = make_translate( xval, yval, zval );
 	//multiply by the existing origin
 	matrix_mult( s->data[ s->top ], transform );
@@ -373,11 +404,19 @@ void my_main( int polygons ) {
 	break;
 
       case SCALE:
-	printf("SCALE\n");
-	xval = op[i].op.scale.d[0];
-	yval = op[i].op.scale.d[1];
-	zval = op[i].op.scale.d[2];
-      
+	//strncpy( knobName =
+
+	if (op[i].op.scale.p == NULL){
+	  xval = op[i].op.scale.d[0];
+	  yval = op[i].op.scale.d[1];
+	  zval = op[i].op.scale.d[2];
+	} else {
+	  knob_value = lookup_symbol(op[i].op.scale.p->name)->s.value;
+	  xval = op[i].op.scale.d[0] * knob_value;
+	  yval = op[i].op.scale.d[1] * knob_value;
+	  zval = op[i].op.scale.d[2] * knob_value;
+	}
+	
 	transform = make_scale( xval, yval, zval );
 	matrix_mult( s->data[ s->top ], transform );
 	//put the new matrix on the top
@@ -389,13 +428,18 @@ void my_main( int polygons ) {
 	printf("ROTATE\n");
 	xval = op[i].op.rotate.degrees * ( M_PI / 180 );
 
-	//get the axis
+	if (op[i].op.rotate.p == NULL){
+	  knob_value = 1;
+	} else {
+	  knob_value = lookup_symbol(op[i].op.rotate.p->name)->s.value;
+	}
+	
 	if ( op[i].op.rotate.axis == 0 ) 
-	  transform = make_rotX( xval );
+	  transform = make_rotX( xval * knob_value);
 	else if ( op[i].op.rotate.axis == 1 ) 
-	  transform = make_rotY( xval );
+	  transform = make_rotY( xval * knob_value);
 	else if ( op[i].op.rotate.axis == 2 ) 
-	  transform = make_rotZ( xval );
+	  transform = make_rotZ( xval * knob_value );
 
 	matrix_mult( s->data[ s->top ], transform );
 	//put the new matrix on the top
@@ -420,21 +464,14 @@ void my_main( int polygons ) {
 	display( t );
 	break;
       }
-      char dir[] = "animate/";
-      char s[ strlen(name) + 5 + 4+strlen(dir) ];
-      strncpy(s, dir, strlen(dir) );
-      strncpy(s, name, strlen(name) );
-      char d[4];
-      sprintf (d, "%03d", diffFrames );
-      
-      strncpy( s, d, strlen(d) );
-      strncpy( s, ".png", 5);
-      
-      save_extension( t, s );
+      sprintf (frame_name, "./animate/%s%03d.png", name, f );
+      save_extension( t, frame_name );
     }
   
     free_stack( s );
     free_matrix( tmp );
+    
     //free_matrix( transform );
+    
   }
 }
