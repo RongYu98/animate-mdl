@@ -2,10 +2,11 @@ frames 50
 basename explode
 push
 move 250 0 0
-scale 200 200 0 biggy
+scale 20 20 0 biggy
+rotate x 360 hi
 torus 0 20 0 20 25
 push
 sphere 0 20 0 10
 push
-box -5 10 0
+box -5 10 0 10 10 10
 vary biggy 0 49 0 1

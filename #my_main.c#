@@ -187,7 +187,7 @@ struct vary_node ** second_pass() {
 	    //printf("a-start: %f \n",(double)(a-start));
 	    //printf("end - start: %d \n", end-start);
 	    //printf("Multiply: %f \n", 1/(end-start));
-	    ///printf("%f\n", newNode->value);
+	    printf("%f\n", newNode->value);
 	    //printf("a is %f, end is %f, start is %f end is %f, start is %f\n", a, endVal, startVal, start, end);
 
 	    values[a] = newNode;
