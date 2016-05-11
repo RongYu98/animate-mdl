@@ -305,7 +305,8 @@ void my_main( int polygons ) {
   printf("Completed second pass\n");
 
   for (f = 0; f<num_frames; f++){
-    
+
+    clear_screen( t );
     //printf("Populating the table with values from the array\n");
     vn = knobs[f];
     for (vn = knobs[f]; vn!=NULL; vn=vn->next){
@@ -320,8 +321,6 @@ void my_main( int polygons ) {
     
     for (i=0;i<lastop;i++) {
       switch (op[i].opcode) {
-      case (1==1):
-	printf("Got here\n");
       case SPHERE:
 	printf("SPHERE \n");
 	tmp = new_matrix( 4, 4 );
