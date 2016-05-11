@@ -187,7 +187,7 @@ struct vary_node ** second_pass() {
 	    //printf("a-start: %f \n",(double)(a-start));
 	    //printf("end - start: %d \n", end-start);
 	    //printf("Multiply: %f \n", 1/(end-start));
-	    printf("%f\n", newNode->value);
+	    ///////printf("%f\n", newNode->value);
 	    //printf("a is %f, end is %f, start is %f end is %f, start is %f\n", a, endVal, startVal, start, end);
 
 	    values[a] = newNode;
@@ -322,7 +322,7 @@ void my_main( int polygons ) {
     for (i=0;i<lastop;i++) {
       switch (op[i].opcode) {
       case SPHERE:
-	printf("SPHERE \n");
+	//printf("SPHERE \n");
 	tmp = new_matrix( 4, 4 );
 	ident(tmp);
 	//printf("%f, %f, %f, %f", op[i].op.sphere.d[0], op[i].op.sphere.d[1], op[i].op.sphere.d[2], op[i].op.sphere.r);
@@ -341,7 +341,7 @@ void my_main( int polygons ) {
 	break;
 
       case TORUS:
-	printf("TORUSED\n");
+	//printf("TORUSED\n");
 	add_torus( tmp, op[i].op.torus.d[0], //cx
 		   op[i].op.torus.d[1],     //cy
 		   op[i].op.torus.d[2],    //cz
@@ -354,7 +354,7 @@ void my_main( int polygons ) {
 	break;
 
       case BOX:
-	printf("BOXED\n");
+	//printf("BOXED\n");
 
 	add_box( tmp, op[i].op.box.d0[0],
 		 op[i].op.box.d0[1],
@@ -365,11 +365,11 @@ void my_main( int polygons ) {
 	matrix_mult( s->data[ s->top ], tmp );
 	draw_polygons( tmp, t, g );
 	tmp->lastcol = 0;
-	printf("BOXED-ed\n");
+	//printf("BOXED-ed\n");
 	break;
 
       case LINE:
-	printf("LINED\n");
+	//printf("LINED\n");
 	add_edge( tmp, op[i].op.line.p0[0],
 		  op[i].op.line.p0[1],
 		  op[i].op.line.p0[1],
@@ -381,7 +381,7 @@ void my_main( int polygons ) {
 	break;
 
       case MOVE:
-	printf("MOVE\n");
+	//printf("MOVE\n");
 	//get the factors
 	if (op[i].op.move.p == NULL){
 	  xval = op[i].op.move.d[0];
@@ -424,7 +424,7 @@ void my_main( int polygons ) {
 	break;
 
       case ROTATE:
-	printf("ROTATE\n");
+	//printf("ROTATE\n");
 	xval = op[i].op.rotate.degrees * ( M_PI / 180 );
 
 	if (op[i].op.rotate.p == NULL){
@@ -447,19 +447,19 @@ void my_main( int polygons ) {
 	break;
 
       case PUSH:
-	printf("PUSH\n");
+	//printf("PUSH\n");
 	push( s );
 	break;
       case POP:
-	printf("POP\n");
+	//printf("POP\n");
 	pop( s );
 	break;
       case SAVE:
-	printf("SAVE\n");
+	//printf("SAVE\n");
 	save_extension( t, op[i].op.save.p->name );
 	break;
       case DISPLAY:
-	printf("DISPLAY\n");
+	//printf("DISPLAY\n");
 	display( t );
 	break;
       }
