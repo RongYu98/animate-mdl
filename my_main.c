@@ -335,9 +335,9 @@ void my_main( int polygons ) {
 		    step);
 	//apply the current top origin
 	matrix_mult( s->data[ s->top ], tmp );
-	print_matrix(tmp);
+	//print_matrix(tmp);
 	draw_polygons( tmp, t, g );
-	display(t);
+	//display(t);
 	tmp->lastcol = 0;
 	break;
 
