@@ -4,7 +4,6 @@ push
 move 250 0 0
 move 0 100 0 higher
 scale 20 20 0 biggy
-rotate x 360 hi
 torus 0 40 0 20 25
 push
 scale 5 5 0 biggy
@@ -13,4 +12,3 @@ pop
 box -5 30 0 10 30 10
 vary biggy 0 49 0 1
 vary higher 0 49 0 1
-vary hi 0 49 0 1
